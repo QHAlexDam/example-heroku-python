@@ -8,6 +8,7 @@ import threading
 from socketserver import ThreadingMixIn
 import psycopg2
 from config import config
+import pandas as pd
 
 def connectDB(): 
   connection = None
@@ -23,6 +24,11 @@ def connectDB():
 
     db_version = cursor.fetchone()
     print(db_version)
+  
+    # Utilize the create_pandas_table function to create a Pandas data frame
+    # Store the data as a variable
+    accounts = create_pandas_table("SELECT * FROM account", connection)
+    print(accounts)
 
     cursor.close()
   except (Exception, psycopg2.DatabaseError) as error:
@@ -31,6 +37,11 @@ def connectDB():
     if connection is not None:
       connection.close()
       print('db connection closed')
+
+ # A function that takes in a PostgreSQL query and outputs a pandas database 
+def create_pandas_table(sql_query, database):
+    table = pd.read_sql_query(sql_query, database)
+    return table
 
 class ThreadHTTPServer(ThreadingMixIn, http.server.HTTPServer):
     "This is an HTTPServer that supports thread-based concurrency."
